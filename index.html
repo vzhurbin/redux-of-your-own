@@ -8,6 +8,7 @@
   <script src='https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js'></script>
   <script src='https://unpkg.com/babel-standalone@6.15.0/babel.min.js'></script>
   <script src='https://tylermcginnis.com/goals-todos-api/index.js'></script>
+  <script src='https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js'></script>
 </head>
 
 <body>
@@ -80,29 +81,6 @@
       }
     }
 
-    function handleToggle(id) {
-      return (dispatch) => {
-        dispatch(toggleTodoAction(id))
-
-        return API.saveTodoToggle(id)
-          .catch(() => {
-            dispatch(toggleTodoAction(id))
-            alert('An error occurred. Try again.')
-          })
-      }
-    }
-
-    function handleAddTodo(name, cb) {
-      return (dispatch) => {
-        return API.saveTodo(name)
-          .then((todo) => {
-            dispatch(addTodoAction(todo))
-            cb()
-          })
-          .catch(() => alert('There was an error. Try again.'))
-      }
-    }
-
     function handleDeleteGoal(goal) {
       return (dispatch) => {
         dispatch(removeGoalAction(goal.id))
@@ -123,6 +101,29 @@
             cb()
           })
           .catch(() => alert('There was an error. Try again.'))
+      }
+    }
+
+    function handleAddTodo(name, cb) {
+      return (dispatch) => {
+        return API.saveTodo(name)
+          .then((todo) => {
+            dispatch(addTodoAction(todo))
+            cb()
+          })
+          .catch(() => alert('There was an error. Try again.'))
+      }
+    }
+
+    function handleToggle(id) {
+      return (dispatch) => {
+        dispatch(toggleTodoAction(id))
+
+        return API.saveTodoToggle(id)
+          .catch(() => {
+            dispatch(toggleTodoAction(id))
+            alert('An error occurred. Try again.')
+          })
       }
     }
 
@@ -162,14 +163,6 @@
       console.log('The new state: ', store.getState())
       console.groupEnd()
       return result
-    }
-
-    const thunk = (store) => (next) => (action) => {
-      if (typeof action === 'function') {
-        return action(store.dispatch)
-      }
-
-      return next(action)
     }
 
     // Reducer function
@@ -216,7 +209,7 @@
       todos,
       goals,
       loading,
-    }), Redux.applyMiddleware(thunk, checker, logger))
+    }), Redux.applyMiddleware(ReduxThunk.default, checker, logger))
   </script>
 
   <script type="text/babel">
@@ -246,15 +239,12 @@
           () => this.input.value = ''
         ))
       }
-
       removeItem = (todo) => {
         this.props.store.dispatch(handleDeleteTodo(todo))
       }
-
       toggleItem = (id) => {
         this.props.store.dispatch(handleToggle(id))
       }
-
       render() {
         return (
           <div>
@@ -267,8 +257,8 @@
             <button onClick={this.addItem}>Add Todo</button>
 
             <List
-              items={this.props.todos}
               toggle={this.toggleItem}
+              items={this.props.todos}
               remove={this.removeItem}
             />
           </div>
@@ -313,6 +303,7 @@
         const { store } = this.props
 
         store.dispatch(handleInitialData())
+
         store.subscribe(() => this.forceUpdate())
       }
       render() {
