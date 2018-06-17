@@ -1,6 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux'
+// import { connect } from 'react-redux'
 
+import { connect } from '../react-redux'
 import Todos from './Todos'
 import Goals from './Goals'
 import {
